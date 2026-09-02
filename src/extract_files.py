@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
+from config.settings import OUTPUT_PATH
 
 def read_produccion(path_processed: str):
     try:
@@ -19,24 +20,9 @@ def read_produccion(path_processed: str):
     return df_produccion
 
 def get_demanda_diaria(df_produccion):
-    demanda_diaria = df_produccion[
-        ["ds", "y", "capacidad", "tipo_dia", "novedad"]
-    ].groupby("ds", as_index = False).agg(
-        tipo_dia = ("tipo_dia", lambda x: x.mode()[0]),
-        novedad = ("novedad", lambda x: x.mode()[0]),
-        y = ("y", "sum"),
-        capacidad = ("capacidad", "sum"),
-    )
-    tipo_dia_cols = ["festivo", "fin_de_semana", "laboral"]
-    novedad_cols = ["control_calidad", "falla", "mantenimiento"]
-    demanda_diaria = pd.get_dummies(demanda_diaria, columns = ["tipo_dia", "novedad"])
-
-#    for col in tipo_dia_cols + novedad_cols:
-#        if col not in demanda_diaria:
-#            demanda_diaria[col] = 0
-
-    demanda_diaria.columns = (
-        demanda_diaria.columns
+    df_produccion = pd.get_dummies(df_produccion, columns = ["tipo_dia", "novedad"])
+    df_produccion.columns = (
+        df_produccion.columns
         .str.strip()
         .str.lower()
         .str.replace(r"\s+","_",regex = True)
@@ -44,7 +30,24 @@ def get_demanda_diaria(df_produccion):
         .str.replace("novedad_", "",regex = False )
     )
 
-    return demanda_diaria
+    demanda_diaria = df_produccion.groupby("ds", as_index = False).agg(
+        y = ("y", "sum"),
+        capacidad = ("capacidad", "sum"),
+        festivo = ("festivo", lambda x: x.mode()[0]),
+        fin_de_semana = ("fin_de_semana", lambda x: x.mode()[0]),
+        laboral = ("laboral", lambda x: x.mode()[0]),
+        control_de_calidad = ("control_de_calidad", lambda x: x.mode()[0]),
+        falla = ("falla", lambda x: x.mode()[0]),
+        mantenimiento = ("mantenimiento", lambda x: x.mode()[0]),
+        ninguna = ("ninguna", lambda x: x.mode()[0]),
+        )
+    demanda_path = os.path.join(OUTPUT_PATH, "demanda")
+    file_path = os.path.join(demanda_path, "demanda_diaria_total.csv")
+
+    demanda_diaria.to_csv(file_path, index=False)
+
+
+    return file_path
 
 def get_demanda_hist_equipment(df_produccion):
     df_hist = df_produccion.copy()
@@ -60,6 +63,10 @@ def get_demanda_hist_equipment(df_produccion):
         .str.replace(r"tipo_dia_", "", regex = True)
         .str.replace("novedad_", "",regex = False )
     )
+    demanda_path = os.path.join(OUTPUT_PATH, "demanda")
+    file_path = os.path.join(demanda_path,  "demanda_diaria_x_equipo.csv")
+    df_hist.to_csv(file_path , index=False)
 
 
-    return df_hist
+
+    return file_path
