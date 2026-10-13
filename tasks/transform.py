@@ -19,11 +19,12 @@ def transform_data(df_produccion):
 
     path_demanda_hist = get_demanda_hist_equipment(df_produccion)
     df_hist = pd.read_csv(path_demanda_hist)
+    days_to_forecast1 = days_to_forecast * 2
 
-    train, val, test, train_dates, val_dates, test_dates = train_val_test(df_hist, days_to_forecast*2)
+    train, val, test, train_dates, val_dates, test_dates = train_val_test(df_hist, days_to_forecast1)
 
 
-    train.to_csv(os.path.join(path_train,"train_demand_csv"), index = False))
+    train.to_csv(os.path.join(path_train,"train_demand_csv"), index = False)
     pd.Series(train_dates, name = "ds").to_csv(os.path.join(
         path_train, "train_dates.csv"), index = False)
 

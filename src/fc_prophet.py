@@ -100,10 +100,11 @@ def bottom_up_models(train_full, best_params, regressors, equipos):
         df_result = pd.DataFrame({
             "ds":df_model["ds"].values,
             "equipo":eq,
-            "weekend":df_model["weekend"].values,
-            "novedad_falla": df_model["novedad_Falla"].values,
-            "novedad_mantenimiento": df_model["novedad_Mantenimiento"].values,
-            "novedad_ninguna": df_model["novedad_ninguna"].values,
+            "festivo":df_model["festivo"].values,
+            "fin_de_semana":df_model["fin_de_semana"].values,
+            "control_de_calidad":df_model["control_de_calidad"].values,
+            "falla": df_model["falla"].values,
+            "mantenimiento": df_model["mantenimiento"].values,
             "capacidad":df_model["capacidad"].values,
             "y": df_model["y"].values,
             "yhat": pred["yhat"].values,
@@ -123,6 +124,9 @@ def bottom_up_models(train_full, best_params, regressors, equipos):
 
 
 def top_down_total(train_full, best_params, regressors):
+    train_full = train_full.copy()
+    train_full["ds"] = pd.to_datetime(train_full["ds"])
+
     train_total = train_full.groupby("ds")["y"].sum().reset_index()
     train_reg = train_full.groupby("ds")[regressors].mean().reset_index()
 
@@ -194,10 +198,11 @@ def fc_bottom_up_test(test_dates, test, m_total, models, equipos, regressors):
         df_result = pd.DataFrame({
         "ds":future["ds"].values,
         "equipo":eq,
-        "weekend":future["weekend"].values,
-        "novedad_falla": future["novedad_Falla"].values,
-        "novedad_mantenimiento": future["novedad_Mantenimiento"].values,
-        "novedad_ninguna": future["novedad_ninguna"].values,
+        "festivo":future["festivo"].values,
+        "fin_de_semana":future["fin_de_semana"].values,
+        "control_de_calidad":future["control_de_calidad"].values,
+        "falla": future["falla"].values,
+        "mantenimiento": future["mantenimiento"].values,
         "capacidad":future["capacidad"].values,
         "y": test[test["equipo"] == eq]["y"].values,
         "yhat": pred["yhat"].values,
