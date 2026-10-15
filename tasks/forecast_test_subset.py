@@ -13,6 +13,8 @@ def fc_test( path_demanda, m_total, models, equipos, regressors):
     test = pd.read_csv(path_test)
     test_dates = sorted(test["ds"].unique())
     path_residuals = os.path.join(OUTPUT_PATH,"residuals/residuals_df.csv")
+    path_fc_long_dia_equipo = os.path.join(OUTPUT_PATH,"forecast/fcProphet_top_dpwn_long_dia_equipo.csv")
+#    path_fc_conciliado_long_dia_equipo = os.path_join(OUTPUT_PATH,f"forecast/fcProphet_top_dpwn_conciliado_dia_equipo.csv")
 
     residuals_df = pd.read_csv(path_residuals)
 
@@ -23,5 +25,8 @@ def fc_test( path_demanda, m_total, models, equipos, regressors):
     results_df, yhat_matrix, total_pred = fc_bottom_up_test(test_dates, test, m_total, models, equipos, regressors)
 
     Y_mint_shrink = mint_reconcile(yhat_matrix,Wm,S)
+
+    results_df.to_csv(path_fc_long_dia_equipo, index = False)
+
 
     return results_df, yhat_matrix, Y_mint_shrink, total_pred
